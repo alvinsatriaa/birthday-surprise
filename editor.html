@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Birthday Surprise — Editor</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#fff7f8;color:#432b31;margin:0;padding:28px}.wrap{max-width:900px;margin:auto}.panel{background:#fff;border:1px solid #eadde1;border-radius:24px;padding:24px;box-shadow:0 12px 35px rgba(74,39,50,.08);margin-bottom:18px}h1,h2{font-family:Georgia,serif}label{display:block;font-weight:700;margin:15px 0 7px}input,textarea{width:100%;padding:12px;border:1px solid #ddd0d5;border-radius:12px;font:inherit;box-sizing:border-box}textarea{min-height:90px;resize:vertical}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.btn{border:0;background:#c95d7a;color:white;padding:13px 18px;border-radius:999px;font-weight:700;cursor:pointer}.muted{color:#7b6269;font-size:14px;line-height:1.6}.card{border:1px solid #eadde1;border-radius:18px;padding:16px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.status{margin-top:12px;color:#51705a;font-weight:600}@media(max-width:760px){body{padding:16px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="panel">
+    <h1>Birthday Surprise Editor</h1>
+    <p class="muted">Ubah kata-kata di bawah ini. Setelah selesai, klik <b>Download content.js</b>, lalu ganti file <b>content.js</b> yang ada di folder website dengan file hasil download.</p>
+    <p class="muted">Placeholder <b>{{restaurant}}</b> tidak perlu diubah pada narasi reveal; itu otomatis menjadi nama restoran yang dipilih.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Halaman Pembuka</h2>
+    <label>Judul Browser</label><input id="pageTitle">
+    <label>Badge</label><input id="openingBadge">
+    <label>Emoji</label><input id="openingEmoji">
+    <label>Judul Utama</label><input id="openingTitle">
+    <label>Narasi</label><textarea id="openingText"></textarea>
+    <label>Teks Tombol</label><input id="openingButton">
+  </div>
+
+  <div class="panel">
+    <h2>Halaman Pilihan</h2>
+    <label>Badge</label><input id="choiceBadge">
+    <label>Judul</label><input id="choiceTitle">
+    <label>Narasi</label><textarea id="choiceText"></textarea>
+  </div>
+
+  <div class="panel">
+    <h2>Pilihan Dinner</h2>
+    <div class="grid" id="restaurantFields"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Halaman Setelah Memilih</h2>
+    <label>Emoji</label><input id="revealEmoji">
+    <label>Badge</label><input id="revealBadge">
+    <label>Judul</label><input id="revealTitle">
+    <label>Narasi</label><textarea id="revealText"></textarea>
+    <label>Quote</label><textarea id="revealQuote"></textarea>
+    <label>Tombol Lanjut</label><input id="revealButton">
+    <label>Tombol Kembali</label><input id="backButton">
+  </div>
+
+  <div class="panel">
+    <h2>Halaman Penutup</h2>
+    <label>Emoji</label><input id="finalEmoji">
+    <label>Badge</label><input id="finalBadge">
+    <label>Judul</label><input id="finalTitle">
+    <label>Narasi</label><textarea id="finalText"></textarea>
+    <label>Quote</label><textarea id="finalQuote"></textarea>
+    <label>Signature</label><input id="finalSignature">
+    <label>Teks Kecil</label><input id="finalTiny">
+  </div>
+
+  <div class="panel">
+    <div class="actions">
+      <button class="btn" onclick="downloadContent()">Download content.js</button>
+      <button class="btn" onclick="previewSaved()">Preview Website</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+const defaults={
+ pageTitle:'A Little Birthday Surprise ❤️',
+ opening:{badge:'A little surprise',emoji:'🎂',title:'Happy Birthday, Birthday Girl!',text:'Hari ini ada satu hal kecil yang sengaja aku siapkan untuk kamu.<br>Dan kamu punya satu tugas penting malam ini...',button:'Buka Surprise ✨'},
+ choices:{badge:"Tonight's date",title:'Kita dinner di mana?',text:'Pilih satu. Aku ingin tahu tempat mana yang paling menggoda kamu malam ini 😌'},
+ restaurants:[
+  {label:'Option 01',emoji:'🍝',title:'Italian Night',name:'Nama Restoran A',description:'Pasta, suasana cozy, dan ngobrol santai sampai lupa waktu.',hint:'A little romantic'},
+  {label:'Option 02',emoji:'🥩',title:'Steak Night',name:'Nama Restoran B',description:'Dinner yang sedikit fancy karena hari ini memang harinya kamu.',hint:'For a special night'},
+  {label:'Option 03',emoji:'🍣',title:'Japanese Date',name:'Nama Restoran C',description:'Sushi, makanan favorit, dan waktu berdua tanpa buru-buru.',hint:'Good food, good company'}
+ ],
+ reveal:{emoji:'💖',badge:'Perfect choice',title:"So... tonight we're going to",text:'Pilihanmu jatuh pada <b>{{restaurant}}</b>.<br><br>Semoga tempat ini bisa jadi bagian kecil dari ulang tahun yang menyenangkan buat kamu.',quote:'Sebenarnya aku cuma butuh satu hal: menghabiskan malam ini bareng kamu. ❤️',button:'Lanjut 💌',backButton:'Ganti pilihan'},
+ final:{emoji:'✨',badge:'One last thing',title:'Happy Birthday ❤️',text:'Terima kasih sudah hadir di hidupku, sudah menjadi tempat cerita, tempat pulang, dan partner untuk banyak hal kecil maupun besar.',quote:"Malam ini kamu tidak perlu memikirkan apa-apa.<br><br>Just get ready. I'm taking you to dinner. 😌",signature:'— dari seseorang yang sayang sama kamu',tiny:'Made with a ridiculous amount of love.'}
+};
+
+function esc(v){return String(v).replace(/\\/g,'\\\\').replace(/`/g,'\\`');}
+function val(id){return document.getElementById(id).value;}
+function set(id,v){document.getElementById(id).value=v;}
+function renderFields(){
+ const wrap=document.getElementById('restaurantFields'); wrap.innerHTML='';
+ defaults.restaurants.forEach((r,i)=>{wrap.innerHTML+=`<div class="card"><h3>Option ${i+1}</h3><label>Label</label><input id="r${i}label"><label>Emoji</label><input id="r${i}emoji"><label>Judul</label><input id="r${i}title"><label>Nama Restoran</label><input id="r${i}name"><label>Deskripsi</label><textarea id="r${i}description"></textarea><label>Hint</label><input id="r${i}hint"></div>`});
+ defaults.restaurants.forEach((r,i)=>Object.entries(r).forEach(([k,v])=>set(`r${i}${k}`,v)));
+}
+function loadDefaults(){
+ set('pageTitle',defaults.pageTitle);
+ Object.entries(defaults.opening).forEach(([k,v])=>set('opening'+k[0].toUpperCase()+k.slice(1),v));
+ Object.entries(defaults.choices).forEach(([k,v])=>set('choice'+k[0].toUpperCase()+k.slice(1),v));
+ Object.entries(defaults.reveal).forEach(([k,v])=>set(k==='backButton'?'backButton':'reveal'+k[0].toUpperCase()+k.slice(1),v));
+ Object.entries(defaults.final).forEach(([k,v])=>set('final'+k[0].toUpperCase()+k.slice(1),v));
+}
+function collect(){
+ return {pageTitle:val('pageTitle'),opening:{badge:val('openingBadge'),emoji:val('openingEmoji'),title:val('openingTitle'),text:val('openingText'),button:val('openingButton')},choices:{badge:val('choiceBadge'),title:val('choiceTitle'),text:val('choiceText')},restaurants:[0,1,2].map(i=>({label:val(`r${i}label`),emoji:val(`r${i}emoji`),title:val(`r${i}title`),name:val(`r${i}name`),description:val(`r${i}description`),hint:val(`r${i}hint`)})),reveal:{emoji:val('revealEmoji'),badge:val('revealBadge'),title:val('revealTitle'),text:val('revealText'),quote:val('revealQuote'),button:val('revealButton'),backButton:val('backButton')},final:{emoji:val('finalEmoji'),badge:val('finalBadge'),title:val('finalTitle'),text:val('finalText'),quote:val('finalQuote'),signature:val('finalSignature'),tiny:val('finalTiny')}};
+}
+function downloadContent(){
+ const data=collect();
+ const out=`/* Generated by Birthday Surprise Editor */\nconst CONTENT = ${JSON.stringify(data,null,2)};\n`;
+ const blob=new Blob([out],{type:'text/javascript;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='content.js'; a.click(); URL.revokeObjectURL(a.href);
+ document.getElementById('status').textContent='content.js sudah dibuat. Ganti file content.js di folder website dengan file ini, lalu refresh index.html.';
+}
+function previewSaved(){
+ const data=collect();
+ const out=`/* preview */\nconst CONTENT = ${JSON.stringify(data)};\n`;
+ const blob=new Blob([out],{type:'text/javascript'}); const url=URL.createObjectURL(blob);
+ const frame=document.createElement('iframe'); frame.style.display='none'; document.body.appendChild(frame);
+ const html=document.querySelector('html').outerHTML;
+ const page=html.replace(/<script src="content.js"><\\/script>/,'<script>'+out.replace(/<\\/script>/g,'<\\/script\\/>')+'<\\/script>');
+ const doc=frame.contentDocument; doc.open(); doc.write(page); doc.close();
+ frame.style.display='block'; frame.style.position='fixed'; frame.style.inset='0'; frame.style.width='100%'; frame.style.height='100%'; frame.style.background='white'; frame.style.zIndex='9999';
+ frame.contentWindow.addEventListener('beforeunload',()=>URL.revokeObjectURL(url));
+}
+renderFields();loadDefaults();
+</script>
+</body>
+</html>

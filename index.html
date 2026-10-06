@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Surprise</title>
+  <meta name="theme-color" content="#f8d8df" />
+  <style>
+    :root{
+      --bg:#fff7f8;
+      --card:rgba(255,255,255,.82);
+      --text:#432b31;
+      --muted:#7b6269;
+      --accent:#c95d7a;
+      --accent-dark:#a74461;
+      --line:rgba(67,43,49,.10);
+      --shadow:0 18px 50px rgba(74,39,50,.12);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--text); background:
+        radial-gradient(circle at 20% 10%, rgba(238,180,195,.35), transparent 34%),
+        radial-gradient(circle at 85% 85%, rgba(247,211,220,.4), transparent 30%),
+        var(--bg);
+      min-height:100vh; overflow-x:hidden;
+    }
+    .floating{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .floating span{position:absolute;opacity:.35;font-size:18px;animation:float 12s linear infinite}
+    .floating span:nth-child(1){left:7%;top:78%;animation-delay:-2s}
+    .floating span:nth-child(2){left:24%;top:56%;animation-delay:-7s}
+    .floating span:nth-child(3){left:66%;top:70%;animation-delay:-4s}
+    .floating span:nth-child(4){left:83%;top:34%;animation-delay:-9s}
+    .floating span:nth-child(5){left:47%;top:18%;animation-delay:-6s}
+    @keyframes float{from{transform:translateY(20vh) rotate(0deg)}to{transform:translateY(-120vh) rotate(220deg)}}
+
+    .app{position:relative;z-index:1;width:min(940px,92vw);margin:0 auto;padding:28px 0 48px;min-height:100vh;display:flex;align-items:center}
+    .shell{width:100%;background:var(--card);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.8);box-shadow:var(--shadow);border-radius:32px;padding:26px}
+    .progress{display:flex;gap:8px;justify-content:center;margin-bottom:18px}
+    .dot{height:7px;flex:1;max-width:82px;border-radius:99px;background:#eadce0;transition:.35s}
+    .dot.active{background:var(--accent)}
+    .screen{display:none;animation:enter .45s ease}
+    .screen.active{display:block}
+    @keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+    .hero{text-align:center;padding:30px 14px 32px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;background:#f8e7eb;color:var(--accent-dark);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+    .emoji{font-size:62px;line-height:1;margin-bottom:18px;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    h1{font-family:Georgia,serif;font-size:clamp(38px,7vw,68px);line-height:1.04;margin-bottom:14px}
+    h2{font-family:Georgia,serif;font-size:clamp(28px,5vw,42px);line-height:1.1;margin-bottom:12px}
+    .lead{font-size:clamp(16px,2.3vw,20px);line-height:1.7;color:var(--muted);max-width:680px;margin:0 auto}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:999px;padding:14px 22px;font-size:15px;font-weight:700;cursor:pointer;background:var(--accent);color:white;box-shadow:0 10px 24px rgba(201,93,122,.22);transition:.2s}
+    .btn:hover{transform:translateY(-2px);background:var(--accent-dark)}
+    .btn.secondary{background:#fff;color:var(--accent-dark);border:1px solid var(--line);box-shadow:none}
+    .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+
+    .options-head{text-align:center;padding:20px 8px 10px}
+    .options{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0 6px}
+    .card{border:1px solid var(--line);border-radius:24px;background:#fff;padding:14px;cursor:pointer;text-align:left;transition:.22s;overflow:hidden}
+    .card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(74,39,50,.10)}
+    .visual{height:170px;border-radius:18px;display:grid;place-items:center;font-size:58px;margin-bottom:14px;background:linear-gradient(135deg,#f9e9ed,#fff1f4)}
+    .card h3{font-family:Georgia,serif;font-size:22px;margin-bottom:6px}
+    .card p{font-size:14px;line-height:1.55;color:var(--muted);margin-bottom:14px}
+    .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)}
+
+    .reveal{text-align:center;padding:36px 16px}
+    .chosen{font-family:Georgia,serif;font-size:clamp(34px,6vw,56px);color:var(--accent-dark);margin:14px auto;max-width:720px}
+    .note{max-width:640px;margin:0 auto;color:var(--muted);line-height:1.75;font-size:17px}
+    .divider{width:90px;height:2px;background:#edc3ce;margin:22px auto}
+    .quote{font-family:Georgia,serif;font-size:22px;line-height:1.55;margin-top:8px}
+
+    .final{text-align:center;padding:36px 16px 34px}
+    .signature{margin-top:22px;color:var(--muted);font-style:italic}
+    .tiny{font-size:12px;color:#9a858b;margin-top:20px}
+
+    .burst{position:fixed;left:50%;top:50%;pointer-events:none;z-index:10}
+    .particle{position:absolute;font-size:18px;animation:burst 900ms ease-out forwards}
+    @keyframes burst{0%{opacity:1;transform:translate(-50%,-50%) scale(.7)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r)) scale(1.2)}}
+
+    @media(max-width:760px){.shell{padding:18px;border-radius:24px}.options{grid-template-columns:1fr}.visual{height:140px}}
+  </style>
+</head>
+<body>
+  <div class="floating"><span>✦</span><span>♡</span><span>✧</span><span>♡</span><span>✦</span></div>
+
+  <main class="app">
+    <div class="shell">
+      <div class="progress" aria-hidden="true">
+        <div class="dot active" id="dot1"></div><div class="dot" id="dot2"></div><div class="dot" id="dot3"></div><div class="dot" id="dot4"></div>
+      </div>
+
+      <section class="screen active" id="screen1">
+        <div class="hero">
+          <div class="badge" id="openingBadge"></div>
+          <div class="emoji" id="openingEmoji"></div>
+          <h1 id="openingTitle"></h1>
+          <p class="lead" id="openingText"></p>
+          <div class="actions"><button class="btn" onclick="go(2)" id="openingButton"></button></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen2">
+        <div class="options-head">
+          <div class="badge" id="choiceBadge"></div>
+          <h2 id="choiceTitle"></h2>
+          <p class="lead" id="choiceText"></p>
+        </div>
+        <div class="options" id="options"></div>
+      </section>
+
+      <section class="screen" id="screen3">
+        <div class="reveal">
+          <div class="emoji" id="revealEmoji"></div>
+          <div class="badge" id="revealBadge"></div>
+          <h2 id="revealTitle"></h2>
+          <div class="chosen" id="chosenName"></div>
+          <div class="divider"></div>
+          <p class="note" id="revealText"></p>
+          <p class="quote" id="revealQuote"></p>
+          <div class="actions"><button class="btn" onclick="go(4)" id="revealButton"></button><button class="btn secondary" onclick="go(2)" id="backButton"></button></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen4">
+        <div class="final">
+          <div class="emoji" id="finalEmoji"></div>
+          <div class="badge" id="finalBadge"></div>
+          <h1 id="finalTitle"></h1>
+          <p class="lead" id="finalText"></p>
+          <div class="divider"></div>
+          <p class="quote" id="finalQuote"></p>
+          <p class="signature" id="finalSignature"></p>
+          <p class="tiny" id="finalTiny"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="burst" class="burst" aria-hidden="true"></div>
+
+  <script src="content.js"></script>
+  <script>
+    const screens = [null,1,2,3,4];
+    let current = 1;
+    let selected = null;
+
+    function setText(id, value){
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = value;
+    }
+
+    function render(){
+      document.title = CONTENT.pageTitle;
+      setText('openingBadge', CONTENT.opening.badge);
+      setText('openingEmoji', CONTENT.opening.emoji);
+      setText('openingTitle', CONTENT.opening.title);
+      setText('openingText', CONTENT.opening.text);
+      setText('openingButton', CONTENT.opening.button);
+
+      setText('choiceBadge', CONTENT.choices.badge);
+      setText('choiceTitle', CONTENT.choices.title);
+      setText('choiceText', CONTENT.choices.text);
+
+      setText('revealEmoji', CONTENT.reveal.emoji);
+      setText('revealBadge', CONTENT.reveal.badge);
+      setText('revealTitle', CONTENT.reveal.title);
+      setText('revealText', CONTENT.reveal.text);
+      setText('revealQuote', CONTENT.reveal.quote);
+      setText('revealButton', CONTENT.reveal.button);
+      setText('backButton', CONTENT.reveal.backButton);
+
+      setText('finalEmoji', CONTENT.final.emoji);
+      setText('finalBadge', CONTENT.final.badge);
+      setText('finalTitle', CONTENT.final.title);
+      setText('finalText', CONTENT.final.text);
+      setText('finalQuote', CONTENT.final.quote);
+      setText('finalSignature', CONTENT.final.signature);
+      setText('finalTiny', CONTENT.final.tiny);
+
+      const options = document.getElementById('options');
+      options.innerHTML = CONTENT.restaurants.map((r, i) => `
+        <article class="card" onclick="choose(${i})">
+          <div class="visual">${r.emoji}</div>
+          <div class="tag">${r.label}</div>
+          <h3>${r.title}</h3>
+          <p>${r.description}</p>
+          <div class="tag">${r.hint}</div>
+        </article>
+      `).join('');
+    }
+
+    function go(n){
+      document.getElementById(`screen${current}`).classList.remove('active');
+      current = n;
+      document.getElementById(`screen${current}`).classList.add('active');
+      for(let i=1;i<=4;i++) document.getElementById(`dot${i}`).classList.toggle('active', i<=current);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function choose(i){
+      selected = CONTENT.restaurants[i];
+      document.getElementById('chosenName').textContent = selected.name;
+      const chosenText = CONTENT.reveal.text.replaceAll('{{restaurant}}', selected.name);
+      const chosenQuote = CONTENT.reveal.quote.replaceAll('{{restaurant}}', selected.name);
+      setText('revealText', chosenText);
+      setText('revealQuote', chosenQuote);
+      burst();
+      setTimeout(()=>go(3), 240);
+    }
+
+    function burst(){
+      const wrap = document.getElementById('burst');
+      wrap.innerHTML='';
+      const symbols=['♥','✦','✧','♡','🎉'];
+      for(let i=0;i<18;i++){
+        const s=document.createElement('span');
+        s.className='particle'; s.textContent=symbols[i%symbols.length];
+        s.style.setProperty('--x', `${(Math.random()*360-180).toFixed(0)}px`);
+        s.style.setProperty('--y', `${(Math.random()*340-220).toFixed(0)}px`);
+        s.style.setProperty('--r', `${(Math.random()*240-120).toFixed(0)}deg`);
+        s.style.animationDelay = `${Math.random()*120}ms`;
+        wrap.appendChild(s);
+      }
+      setTimeout(()=>wrap.innerHTML='',1200);
+    }
+
+    render();
+  </script>
+</body>
+</html>
